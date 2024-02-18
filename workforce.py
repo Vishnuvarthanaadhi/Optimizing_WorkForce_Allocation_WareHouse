@@ -1,21 +1,17 @@
 import openpyxl
 import pandas as pd
 from openpyxl.styles import Font, PatternFill
-import os
-import subprocess
-import matplotlib.pyplot as plt
-import seaborn as sns
+import sys
 
-original_file_path = r"c:\Users\Legion 5pro\Downloads\SingleSheet (1).xlsx"
-
-try:
-    # Input file path
-    input_file_path = r"C:\Users\Legion 5pro\Downloads\Book1 (2).xlsx"
-
-    # Read the input DataFrame
+# Function to read input DataFrame from Excel file
+def read_input_data(input_file_path):
     df_input = pd.read_excel(input_file_path)
+    # Additional preprocessing steps if needed
+    return df_input
 
-    # Convert 'Date' column to datetime format
+# Function to preprocess input DataFrame
+def preprocess_input_data(df_input):
+   # Convert 'Date' column to datetime format
     df_input['Date'] = pd.to_datetime(df_input['Date'], format='%d-%m-%Y')
 
     # Extract start and end times from 'timing' column and remove extra spaces
@@ -29,83 +25,65 @@ try:
 
     print('start time', start_timestamp)
     print('end Time', end_timestamp)
+    return start_timestamp,end_timestamp
 
-    # Load the workbook
-    workbook = openpyxl.load_workbook(original_file_path)
-
-    # Get the 'MainData' sheet
-    MainData_sheet = workbook['MainData']
-
-            # Create DataFrame from MainData_sheet
-    MainData_df = pd.DataFrame(MainData_sheet.values, columns=[col[0].value for col in MainData_sheet.iter_cols()])
-    
-    # Check if 'Actual Arrival' column exists in MainData_df
+# Function to filter data based on time range
+def filter_data(MainData_df, start_timestamp, end_timestamp):
+   # Check if 'Actual Arrival' column exists in MainData_df
     if 'Actual Arrival' in MainData_df.columns:
         # Use 'Actual Arrival' if not null, otherwise fallback to 'Sched Arrival'
         MainData_df['Arrival'] = MainData_df['Actual Arrival'].combine_first(MainData_df['Sched Arrival'])
         Actual_Arrival = MainData_df['Arrival']
-        #print("MainData_df['Arrival'] is the ouput of",Actual_Arrival)
+        
     else:
         # Use 'Sched Arrival' if 'Actual Arrival' column doesn't exist
         MainData_df['Arrival'] = MainData_df['Sched Arrival']
         Actual_Arrival = MainData_df['Arrival']
-       # print("MainData_df['Arrival'] is the ouput of sched arrival",Actual_Arrival)
-    # Convert 'Arrival' column to datetime with error handling
-    # Convert 'Arrival' column to datetime with specified format and error handling
+
     MainData_df['Arrival'] = pd.to_datetime(MainData_df['Arrival'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
     
-    #print("MainData_df['Arrival'",MainData_df['Arrival'])
     # Filter the original DataFrame based on the input date and time range
     filtered_data = MainData_df[
         (MainData_df['Arrival'] >= start_timestamp)
         & (MainData_df['Arrival'] <= end_timestamp)
     ].copy()
-    print("Filtered data between {} and {}: \n{}".format(start_timestamp, end_timestamp, filtered_data))
-    
-    filtered_data_sorted = filtered_data.sort_values(by='Arrival', ascending=True)
-    print("Filtered data between {} and {}: \n{}".format(start_timestamp, end_timestamp, filtered_data_sorted))
+    return filtered_data
 
-    
+# Function to calculate workforce for a given time interval
+def calculate_workforce(filtered_data, Total_Minutes_calculation):
 
-    #filtered_data = original_data.copy()
-    # Sum 'EXTRA SMALL' and 'SMALL' columns and create new columns 'Dumper' and 'Infeed'
     row_count = len(filtered_data)
     filtered_data['Dumper'] = filtered_data['EXTRA SMALL'] + filtered_data['SMALL']
     filtered_data['Infeed'] = filtered_data['MEDIUM'] + filtered_data['LARGE']
     filtered_data['LL'] = filtered_data['EXTRA LARGE'] + filtered_data['NC'] + filtered_data['NC PLUS'] + filtered_data['HEAVY BULKY'] + filtered_data['HEAVY BULKY PLUS']
     filtered_data['XD'] = filtered_data['Xdock Packages']
 
-
-    Total_Minutes_calculation  = (end_timestamp - start_timestamp).total_seconds() / 60
-    print('Total_Minutes_calculation = ',Total_Minutes_calculation)
-    # Calculate the total sum of the 'Dumper' and 'Infeed' columns
     total_dumper = filtered_data['Dumper'].sum()
     total_infeed = filtered_data['Infeed'].sum()
     total_sortable = total_dumper + total_infeed
     total_LL = filtered_data['LL'].sum()
     total_XD = filtered_data['XD'].sum()
     total_Volume = total_XD + total_dumper + total_infeed + total_LL
+    row_count = len(filtered_data)
     total_unloader = round((row_count * 45) / Total_Minutes_calculation)
     total_injectors = round(total_infeed / ((700 / 60) * (Total_Minutes_calculation)))
     total_facers = round(total_dumper / ((2300 / 60) * (Total_Minutes_calculation)))
-    #total_dumper_operators = 2 if total_dumper >= 9000 else if 1
-    if(total_dumper>=9000):
+    if total_dumper >= 9000:
         total_dumper_operators = 2
-    elif(total_dumper==0):
+    elif total_dumper == 0:
         total_dumper_operators = 0
     else:
         total_dumper_operators = 1
+    
+    
 
-
-    # Extract 'Dumper' and 'Infeed' columns
+    #Printing Selected columns
     selected_columns = filtered_data[['Route','Load ID','Sched Arrival','Actual Arrival','Dumper', 'Infeed', 'LL']]
 
-    # Create or get the 'Output' sheet
-    output_sheet = workbook['Output']
-        # Clear the contents of the 'Output' sheet
-    for row in output_sheet.iter_rows(min_row=2, max_row=output_sheet.max_row, min_col=1, max_col=output_sheet.max_column):
-        for cell in row:
-            cell.value = None
+    return total_unloader, selected_columns,total_injectors, total_facers, total_dumper_operators, total_Volume,total_dumper,total_infeed,total_sortable,total_LL,total_XD,row_count
+
+# Function to write output to Excel file
+def write_output_to_excel(output_sheet, selected_columns, total_dumper, total_infeed, total_sortable, total_LL, total_XD, row_count, total_unloader, total_injectors, total_facers, total_dumper_operators, total_Volume):
     # Write column names to the 'Output' sheet starting from cell P6
     for idx, col in enumerate(selected_columns.columns):
         col_letter = chr(ord('I') + idx)  # P, Q, R, ...
@@ -118,7 +96,7 @@ try:
         for i, value in enumerate(selected_columns[col]):
             output_sheet[col_letter + str(start_row + i)] = value
 
-            # Set font style for labels
+    # Set font style for labels
     font_labels = Font(bold=True, color='000000', size=12)
     for label_cell in ['E3', 'E4', 'E5', 'E6', 'E7', 'A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A9', 'E9', 'E10', 'E1']:
         output_sheet[label_cell].font = font_labels
@@ -138,7 +116,6 @@ try:
     for value_cell in ['F3', 'F4', 'F5', 'F6', 'F7', 'B1', 'F1', 'B3', 'B4', 'B5', 'B7']:
         output_sheet[value_cell].fill = fill_values
 
-   
     # Write the labels to cells M7 and M8
     output_sheet['E3'] = 'Dumper'
     output_sheet['E4'] = 'Infeed'
@@ -168,10 +145,11 @@ try:
     output_sheet['B4'] = total_injectors
     output_sheet['B5'] = total_facers
     output_sheet['B7'] = total_dumper_operators
+    return output_sheet
 
-
-#To calculate the workforce for wholeday:
-# Iterate over each hour in a day
+# Function to calculate workforce for the whole day
+def calculate_workforce_whole_day(MainData_df,workbook):
+    
     whole_day_sheet = workbook['WholeDay']
 
     for hour in range(24):
@@ -208,7 +186,7 @@ try:
         total_LL = filtered_data_wholeDay['LL'].sum()
         total_XD = filtered_data_wholeDay['XD'].sum()
         total_Volume = total_XD + total_dumper + total_infeed + total_LL
-        total_unloader = round((row_count * 45) / Total_Minutes_calculation)
+        total_unloader = round((row_count * 45) / Total_Minutes_calculation_wholeDay)
         total_injectors = round(total_infeed / ((700 / 60) * (Total_Minutes_calculation_wholeDay)))
         total_facers = round(total_dumper / ((2300 / 60) * (Total_Minutes_calculation_wholeDay)))
     
@@ -233,10 +211,57 @@ try:
         whole_day_sheet.cell(row=9, column=hour + 2, value=total_facers)
         whole_day_sheet.cell(row=11, column=hour + 2, value=total_dumper_operators)
         whole_day_sheet.cell(row=13, column=hour + 2, value=total_Volume)
-    
-    print("output_sheet",output_sheet)
-    # Save changes to the Excel file
-    workbook.save(original_file_path)
+    return whole_day_sheet
 
-except Exception as e:
-    print(f"An error occurred: {e}")
+def main():
+    
+    input_file_path = r"C:\Users\Legion 5pro\Downloads\Input.xlsx"
+    output_file_path = r"c:\Users\Legion 5pro\Downloads\SingleSheet.xlsx"
+    workbook = openpyxl.load_workbook(output_file_path)
+    try:
+        # Read input DataFrame
+        df_input = read_input_data(input_file_path)
+        # Preprocess input DataFrame
+        start_timestamp,end_timestamp = preprocess_input_data(df_input)
+
+        # Define start and end timestamps
+        # Assuming start and end timestamps are provided or calculated
+        # Load the workbook
+        workbook = openpyxl.load_workbook(output_file_path)
+
+        # Get the 'MainData' sheet
+        MainData_sheet = workbook['MainData']
+        MainData_df = pd.DataFrame(MainData_sheet.values, columns=[col[0].value for col in MainData_sheet.iter_cols()])
+        # Filter data based on time range
+        filtered_data = filter_data(MainData_df, start_timestamp, end_timestamp)
+
+        print("filtered_data : ",filtered_data)
+        # Calculate Total_Minutes_calculation (time difference in minutes between start and end timestamps)
+        Total_Minutes_calculation  = (end_timestamp - start_timestamp).total_seconds() / 60
+
+        # Calculate workforce for the specified time range
+        total_unloader, selected_columns,total_injectors, total_facers, total_dumper_operators, total_Volume,total_dumper, total_infeed, total_sortable, total_LL, total_XD, row_count = calculate_workforce(filtered_data, Total_Minutes_calculation)
+
+        # Create or get the 'Output' sheet
+        workbook = openpyxl.load_workbook(output_file_path)
+        output_sheet = workbook['Output']
+
+
+        # Write output to Excel file
+        write_output_to_excel(output_sheet, selected_columns, total_dumper, total_infeed, total_sortable, total_LL, total_XD, row_count, total_unloader, total_injectors, total_facers, total_dumper_operators, total_Volume)
+
+        # Calculate workforce for the whole day
+        workforce_data_whole_day = calculate_workforce_whole_day(MainData_df,workbook)
+
+        # Save changes to the Excel file
+        workbook.save(output_file_path)
+
+    except FileNotFoundError as e:
+        print(f"File not found: {e}")
+    except PermissionError as e:
+        print(f"Permission denied: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
