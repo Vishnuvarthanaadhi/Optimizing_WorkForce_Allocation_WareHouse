@@ -48,6 +48,7 @@ This project is licensed under the MIT License.
 The code is organized into several functions:
 
 read_input_data: Reads input data from an Excel file.
+
 ![Workflow](https://github.com/Vishnuvarthanaadhi/Workforce/blob/a6975e0c6c78cac52ec0962fb46b5bf98c0bc08e/Input.png)
 
 preprocess_input_data: Preprocesses input data, including converting date and time columns.
@@ -56,7 +57,9 @@ filter_data: Filters data based on a specified time range.
 
 calculate_workforce: Calculates workforce for a given time interval.
 
-write_output_to_excel: Writes the calculated workforce to an output Excel file.
+write_output_to_excel: Writes the calculated workforce to an output Excel file.So For the above Input, Output sheet will calculate the total workforce needed for the given Time Range.
+
+![Workflow](https://github.com/Vishnuvarthanaadhi/Workforce/blob/5f3c3892291eebb2735fce5a9b52360eee10b965/Output.png)
 
 calculate_workforce_whole_day: Calculates workforce for the whole day in hourly intervals.
 
