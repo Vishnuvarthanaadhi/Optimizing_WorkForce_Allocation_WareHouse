@@ -3,12 +3,14 @@ import pandas as pd
 from openpyxl.styles import Font, PatternFill
 import os
 import subprocess
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-original_file_path = r"C:\Users\Legion 5pro\Downloads\singleSheet.xlsx"
+original_file_path = r"c:\Users\Legion 5pro\Downloads\SingleSheet (1).xlsx"
 
 try:
     # Input file path
-    input_file_path = r"C:\Users\Legion 5pro\Downloads\Input.xlsx"
+    input_file_path = r"C:\Users\Legion 5pro\Downloads\Book1 (2).xlsx"
 
     # Read the input DataFrame
     df_input = pd.read_excel(input_file_path)
@@ -191,17 +193,14 @@ try:
         ].copy()
         
         # Print or process the filtered data for the current time interval
-        print(f"Filtered data for {time_interval}: \n{filtered_data_wholeDay}")
 
         row_count = len(filtered_data_wholeDay)
         filtered_data_wholeDay['Dumper'] = filtered_data_wholeDay['EXTRA SMALL'] + filtered_data_wholeDay['SMALL']
         filtered_data_wholeDay['Infeed'] = filtered_data_wholeDay['MEDIUM'] + filtered_data_wholeDay['LARGE']
         filtered_data_wholeDay['LL'] = filtered_data_wholeDay['EXTRA LARGE'] + filtered_data_wholeDay['NC'] + filtered_data_wholeDay['NC PLUS'] + filtered_data_wholeDay['HEAVY BULKY'] + filtered_data_wholeDay['HEAVY BULKY PLUS']
         filtered_data_wholeDay['XD'] = filtered_data_wholeDay['Xdock Packages']
-        print(row_count)
 
         Total_Minutes_calculation_wholeDay  = 60
-        print('Total_Minutes_calculation = ',Total_Minutes_calculation_wholeDay)
         # Calculate the total sum of the 'Dumper' and 'Infeed' columns
         total_dumper = filtered_data_wholeDay['Dumper'].sum()
         total_infeed = filtered_data_wholeDay['Infeed'].sum()
@@ -212,17 +211,7 @@ try:
         total_unloader = round((row_count * 45) / Total_Minutes_calculation)
         total_injectors = round(total_infeed / ((700 / 60) * (Total_Minutes_calculation_wholeDay)))
         total_facers = round(total_dumper / ((2300 / 60) * (Total_Minutes_calculation_wholeDay)))
-        print("total_dumper : ",total_dumper)
-        print("total_infeed : ",total_infeed)
-        print("total_sortable : ",total_sortable)
-        print("total_LL : ",total_LL)
-        print("total_XD : ",total_XD)
-        print("total_Volume : ",total_Volume)
-        print("total_unloader : ",total_unloader)
-        print("total_injectors : ",total_injectors)
-        print("total_facers : ",total_facers)
-        
-
+    
         #total_dumper_operators = 2 if total_dumper >= 9000 else if 1
         if(total_dumper>=9000):
             total_dumper_operators = 2
@@ -244,7 +233,7 @@ try:
         whole_day_sheet.cell(row=9, column=hour + 2, value=total_facers)
         whole_day_sheet.cell(row=11, column=hour + 2, value=total_dumper_operators)
         whole_day_sheet.cell(row=13, column=hour + 2, value=total_Volume)
-
+    
     print("output_sheet",output_sheet)
     # Save changes to the Excel file
     workbook.save(original_file_path)
