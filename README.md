@@ -48,7 +48,7 @@ This project is licensed under the MIT License.
 The code is organized into several functions:
 
 read_input_data: Reads input data from an Excel file.
-![Workflow](images/workflow.png)
+![Workflow](https://github.com/Vishnuvarthanaadhi/Workforce/blob/1319758ad4ca784570fa313a6cf1d2bebd76a917/Screenshot%202024-02-18%20204350.png)
 preprocess_input_data: Preprocesses input data, including converting date and time columns.
 
 filter_data: Filters data based on a specified time range.
