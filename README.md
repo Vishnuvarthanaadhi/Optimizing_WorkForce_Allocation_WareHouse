@@ -70,3 +70,5 @@ openpyxl
 
 ## Credits
 The project utilizes the pandas and openpyxl libraries for data manipulation and working with Excel files in Python.
+
+@Vishnuvarthanaadhi: Project author and maintainer
