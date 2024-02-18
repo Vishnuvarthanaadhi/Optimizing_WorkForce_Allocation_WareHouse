@@ -57,12 +57,13 @@ filter_data: Filters data based on a specified time range.
 
 calculate_workforce: Calculates workforce for a given time interval.
 
-write_output_to_excel: Writes the calculated workforce to an output Excel file.So For the above Input, Output sheet will calculate the total workforce needed for the given Time Range.
+write_output_to_excel: Writes the calculated workforce to an output Excel file.So For the above Input, Output sheet contains the total workforce needed for the given Time Range.
 
 ![Workflow](https://github.com/Vishnuvarthanaadhi/Workforce/blob/5f3c3892291eebb2735fce5a9b52360eee10b965/Output.png)
 
 calculate_workforce_whole_day: Calculates workforce for the whole day in hourly intervals.
 
+![Workflow](https://github.com/Vishnuvarthanaadhi/Workforce/blob/eefe6485267c3c9ea7967b4fb2036d02dc919c77/Wholeday.png)
 ## Dependencies
 pandas
 openpyxl
