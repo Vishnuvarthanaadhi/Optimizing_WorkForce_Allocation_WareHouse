@@ -18,9 +18,9 @@ Navigate to the project directory:  cd Workforce
 
 Install the required dependencies:  pip install pandas openpyxl
 ## Usage
-Prepare your input data in an Excel file with the required format. The input file should contain shipment data and operational details.
+Prepare your input data in an Excel file with the required format. The input file should contain Required Date and timing range.[Download Input Sheet](path/to/input_sheet.xlsx)
 Update the input_file_path variable in the main() function of workforce.py with the path to your input Excel file.
-Update the output_file_path variable in the main() function with the desired path for the output Excel file.
+Update the output_file_path variable in the main() function with the desired path for the output Excel file.[Download Output Sheet](path/to/output_sheet.xlsx)
 
 Run the script:python workforce.py
 
@@ -37,9 +37,9 @@ This project is licensed under the MIT License.
 
 workforce.py: Main Python script containing functions for reading input data, preprocessing, filtering data, calculating workforce, writing output to Excel, and calculating workforce for the whole day.
 
-Input.xlsx: Sample input Excel file containing shipment data and operational details.
+Input.xlsx: Sample input Excel file containing Date and Timing range,Which is required to calculate.
 
-SingleSheet.xlsx: Sample output Excel file with workforce allocation details for a specified time range.
+MainData.xlsx: Sample output Excel file with workforce allocation details for a specified time range.
 
 README.md: Project documentation.
 
