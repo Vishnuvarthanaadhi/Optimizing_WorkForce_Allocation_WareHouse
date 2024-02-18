@@ -1,7 +1,7 @@
 # Project Name
-Optimizing Workforce Allocation in Amazon warehouse.
+Optimizing Workforce Allocation in XXX warehouse.
 ## Description
-This project aims to optimize workforce allocation in an Amazon warehouse based on the incoming shipment data and operational requirements. 
+This project aims to optimize workforce allocation in an XXX warehouse based on the incoming shipment data and operational requirements. 
 It calculates the required number of unloaders, injectors, facers, and dumper operators for a specified time range and for the whole day. 
 The output is generated in an Excel file with detailed workforce allocation information.
 
