@@ -18,7 +18,7 @@ Navigate to the project directory:  cd Workforce
 
 Install the required dependencies:  pip install pandas openpyxl
 ## Usage
-Prepare your input data in an Excel file with the required format. The input file should contain Required Date and timing range.[Download Input Sheet](path/to/input_sheet.xlsx)
+Prepare your input data in an Excel file with the required format. The input file should contain Required Date and timing range.[Download Input Sheet](https://github.com/Vishnuvarthanaadhi/Workforce/blob/5c87cc692ae603f218f57c08137f134910a7fc9f/Input.xlsx)
 Update the input_file_path variable in the main() function of workforce.py with the path to your input Excel file.
 Update the output_file_path variable in the main() function with the desired path for the output Excel file.[Download Output Sheet](path/to/output_sheet.xlsx)
 
