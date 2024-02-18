@@ -28,20 +28,36 @@ The output Excel file will be generated with workforce allocation details.
 
 ## Contributing
 
-Contributions are welcome! If you encounter any bugs, have suggestions for improvements, or want to contribute new features, feel free to open an issue or submit a pull request.
+Contributions to this project are welcome. To contribute, follow these steps:
+
+Fork the repository.
+
+Create a new branch for your feature or bug fix.
+
+Make your changes and commit them with descriptive commit messages.
+
+Push your changes to your fork.
+
+Submit a pull request to the main repository.
 
 ## License
 This project is licensed under the MIT License.
 
 ## Code Structure
 
-workforce.py: Main Python script containing functions for reading input data, preprocessing, filtering data, calculating workforce, writing output to Excel, and calculating workforce for the whole day.
+The code is organized into several functions:
 
-Input.xlsx: Sample input Excel file containing Date and Timing range,Which is required to calculate.
+read_input_data: Reads input data from an Excel file.
 
-MainData.xlsx: Sample output Excel file with workforce allocation details for a specified time range.
+preprocess_input_data: Preprocesses input data, including converting date and time columns.
 
-README.md: Project documentation.
+filter_data: Filters data based on a specified time range.
+
+calculate_workforce: Calculates workforce for a given time interval.
+
+write_output_to_excel: Writes the calculated workforce to an output Excel file.
+
+calculate_workforce_whole_day: Calculates workforce for the whole day in hourly intervals.
 
 ## Dependencies
 pandas
