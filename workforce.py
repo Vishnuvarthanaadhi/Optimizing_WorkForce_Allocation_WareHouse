@@ -4,11 +4,11 @@ from openpyxl.styles import Font, PatternFill
 import os
 import subprocess
 
-original_file_path = r'C:\Users\Legion 5pro\Documents\SingleSheet.xlsx'
+original_file_path = r"C:\Users\Legion 5pro\Downloads\singleSheet.xlsx"
 
 try:
     # Input file path
-    input_file_path = r'C:\Users\Legion 5pro\Downloads\Book1.xlsx'
+    input_file_path = r"C:\Users\Legion 5pro\Downloads\Input.xlsx"
 
     # Read the input DataFrame
     df_input = pd.read_excel(input_file_path)
@@ -59,6 +59,11 @@ try:
         & (MainData_df['Arrival'] <= end_timestamp)
     ].copy()
     print("Filtered data between {} and {}: \n{}".format(start_timestamp, end_timestamp, filtered_data))
+    
+    filtered_data_sorted = filtered_data.sort_values(by='Arrival', ascending=True)
+    print("Filtered data between {} and {}: \n{}".format(start_timestamp, end_timestamp, filtered_data_sorted))
+
+    
 
     #filtered_data = original_data.copy()
     # Sum 'EXTRA SMALL' and 'SMALL' columns and create new columns 'Dumper' and 'Infeed'
@@ -161,6 +166,84 @@ try:
     output_sheet['B4'] = total_injectors
     output_sheet['B5'] = total_facers
     output_sheet['B7'] = total_dumper_operators
+
+
+#To calculate the workforce for wholeday:
+# Iterate over each hour in a day
+    whole_day_sheet = workbook['WholeDay']
+
+    for hour in range(24):
+        # Calculate the start and end hours for the current interval
+        start_hour = hour
+        end_hour = (hour + 1) % 24  # Wrap around to 0 if hour + 1 exceeds 23
+        
+        # Construct the time interval string
+        time_interval = f"{start_hour:02}:00 - {end_hour:02}:00"
+        
+        # Convert the time interval to datetime objects
+        start_timestamp_wholeDay = pd.to_datetime(f"2023-12-22 {start_hour:02}:00:00")
+        end_timestamp_wholeDay = pd.to_datetime(f"2023-12-22 {end_hour:02}:00:00")
+        
+        # Filter the data for the current time interval
+        filtered_data_wholeDay = MainData_df[
+            (MainData_df['Arrival'] >= start_timestamp_wholeDay)
+            & (MainData_df['Arrival'] < end_timestamp_wholeDay)
+        ].copy()
+        
+        # Print or process the filtered data for the current time interval
+        print(f"Filtered data for {time_interval}: \n{filtered_data_wholeDay}")
+
+        row_count = len(filtered_data_wholeDay)
+        filtered_data_wholeDay['Dumper'] = filtered_data_wholeDay['EXTRA SMALL'] + filtered_data_wholeDay['SMALL']
+        filtered_data_wholeDay['Infeed'] = filtered_data_wholeDay['MEDIUM'] + filtered_data_wholeDay['LARGE']
+        filtered_data_wholeDay['LL'] = filtered_data_wholeDay['EXTRA LARGE'] + filtered_data_wholeDay['NC'] + filtered_data_wholeDay['NC PLUS'] + filtered_data_wholeDay['HEAVY BULKY'] + filtered_data_wholeDay['HEAVY BULKY PLUS']
+        filtered_data_wholeDay['XD'] = filtered_data_wholeDay['Xdock Packages']
+        print(row_count)
+
+        Total_Minutes_calculation_wholeDay  = 60
+        print('Total_Minutes_calculation = ',Total_Minutes_calculation_wholeDay)
+        # Calculate the total sum of the 'Dumper' and 'Infeed' columns
+        total_dumper = filtered_data_wholeDay['Dumper'].sum()
+        total_infeed = filtered_data_wholeDay['Infeed'].sum()
+        total_sortable = total_dumper + total_infeed
+        total_LL = filtered_data_wholeDay['LL'].sum()
+        total_XD = filtered_data_wholeDay['XD'].sum()
+        total_Volume = total_XD + total_dumper + total_infeed + total_LL
+        total_unloader = round((row_count * 45) / Total_Minutes_calculation)
+        total_injectors = round(total_infeed / ((700 / 60) * (Total_Minutes_calculation_wholeDay)))
+        total_facers = round(total_dumper / ((2300 / 60) * (Total_Minutes_calculation_wholeDay)))
+        print("total_dumper : ",total_dumper)
+        print("total_infeed : ",total_infeed)
+        print("total_sortable : ",total_sortable)
+        print("total_LL : ",total_LL)
+        print("total_XD : ",total_XD)
+        print("total_Volume : ",total_Volume)
+        print("total_unloader : ",total_unloader)
+        print("total_injectors : ",total_injectors)
+        print("total_facers : ",total_facers)
+        
+
+        #total_dumper_operators = 2 if total_dumper >= 9000 else if 1
+        if(total_dumper>=9000):
+            total_dumper_operators = 2
+        elif(total_dumper==0):
+            total_dumper_operators = 0
+        else:
+            total_dumper_operators = 1
+
+        # Write the time interval to the corresponding cell in the 'WholeDay' sheet
+        whole_day_sheet.cell(row=1, column=hour + 2, value=time_interval)
+         # Write totals to the corresponding cells in the 'WholeDay' sheet
+        whole_day_sheet.cell(row=2, column=hour + 2, value=total_dumper)
+        whole_day_sheet.cell(row=3, column=hour + 2, value=total_infeed)
+        whole_day_sheet.cell(row=4, column=hour + 2, value=total_sortable)
+        whole_day_sheet.cell(row=5, column=hour + 2, value=total_LL)
+        whole_day_sheet.cell(row=6, column=hour + 2, value=total_XD)
+        whole_day_sheet.cell(row=7, column=hour + 2, value=total_unloader)
+        whole_day_sheet.cell(row=8, column=hour + 2, value=total_injectors)
+        whole_day_sheet.cell(row=9, column=hour + 2, value=total_facers)
+        whole_day_sheet.cell(row=11, column=hour + 2, value=total_dumper_operators)
+        whole_day_sheet.cell(row=13, column=hour + 2, value=total_Volume)
 
     print("output_sheet",output_sheet)
     # Save changes to the Excel file
